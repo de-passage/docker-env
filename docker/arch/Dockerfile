@@ -1,16 +1,40 @@
 FROM archlinux/archlinux
 
-RUN pacman -Syu --needed --noconfirm base-devel bash git neovim vim
-# RUN mkdir /tmp/downloads -p && cd /tmp/downloads && \
-#     git clone https://aur.archlinux.org/yay-bin.git &&  \
-#     cd yay-bin && makepkg -si
-# RUN yay -Y --gendb 
-# RUN yay -S neovim
+RUN pacman -Syu --needed --noconfirm base-devel bash git neovim vim tmux fzf zsh git-delta jq starship curl ripgrep fd bat
 
-RUN useradd -m dev && echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+ARG home_dir=/home/dev 
+ARG workspace="${home_dir}/workspace"
+ARG dotfiles="${workspace}/dotfiles"
+ARG config="${home_dir}/.config"
+
+RUN useradd -d "${home_dir}" -m dev -s /usr/sbin/zsh && echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER dev
+WORKDIR "${home_dir}"
 
-RUN git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/start/packer.nvim && \
-    git clone https://github.com/de-passage/neovim-config.git ~/.config/nvim && \
+RUN mkdir -p "${workspace}" && mkdir -p "${config}" && mkdir "${config}/tmux"
+
+RUN git clone --bare https://github.com/de-passage/dotfiles "${dotfiles}" && \
+    git --work-tree="${home_dir}" --git-dir="${dotfiles}" checkout wsl_zsh --force
+
+RUN git clone https://github.com/tmux-plugins/tpm "${home_dir}/.tmux/plugins/tpm" && \
+    echo <<EOF >>  "${home_dir}/.tmux.conf"
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'erikw/tmux-powerline'
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run '~/.tmux/plugins/tpm/tpm'
+EOF
+
+# Install Oh-my-zsh and plugins
+RUN sh -c "$(curl https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-"${home_dir}/.oh-my-zsh/custom"}/plugins/zsh-syntax-highlighting" && \
+    git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-"${home_dir}/.oh-my-zsh/custom"}/plugins/zsh-autosuggestions" && \
+    git clone https://github.com/zsh-users/zsh-completions "${ZSH_CUSTOM:-"${home_dir}/.oh-my-zsh/custom"}/plugins/zsh-completions" && \
+    git clone https://github.com/hlissner/zsh-autopair "${ZSH_CUSTOM:-"${home_dir}/.oh-my-zsh/custom"}/plugins/zsh-autopair" && \
+    mv "${home_dir}/.zshrc.pre-oh-my-zsh" "${home_dir}/.zshrc"
+
+RUN git clone --depth 1 https://github.com/wbthomason/packer.nvim "${home_dir}/.local/share/nvim/site/pack/packer/start/packer.nvim" && \
+    git clone https://github.com/de-passage/neovim-config.git "${home_dir}/.config/nvim" && \
     nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'

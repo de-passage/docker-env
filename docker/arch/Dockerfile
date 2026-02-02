@@ -35,6 +35,6 @@ RUN sh -c "$(curl https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools
     git clone https://github.com/hlissner/zsh-autopair "${ZSH_CUSTOM:-"${home_dir}/.oh-my-zsh/custom"}/plugins/zsh-autopair" && \
     mv "${home_dir}/.zshrc.pre-oh-my-zsh" "${home_dir}/.zshrc"
 
-RUN git clone --depth 1 https://github.com/wbthomason/packer.nvim "${home_dir}/.local/share/nvim/site/pack/packer/start/packer.nvim" && \
-    git clone https://github.com/de-passage/neovim-config.git "${home_dir}/.config/nvim" && \
-    nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+ARG NEOVIM_CONFIG_BRANCH=master
+RUN git clone --branch ${NEOVIM_CONFIG_BRANCH} https://github.com/de-passage/neovim-config.git "${home_dir}/.config/nvim"  && \
+    nvim --headless -c 'MasonInstall lua-language-server' -c 'q'

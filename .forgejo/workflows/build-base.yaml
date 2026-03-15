@@ -51,7 +51,7 @@ jobs:
         run: echo "${{ secrets.REGISTRY_TOKEN }}" | docker login git.sylvainleclercq.com -u depassage --password-stdin
 
       - name: Build base
-        run: docker build -t git.sylvainleclercq.com/depassage/coder-base:${IMAGE_TAG} -f base/Containerfile .
+        run: docker build -t git.sylvainleclercq.com/depassage/coder-base:${IMAGE_TAG} -f docker/arch/Dockerfile docker/arch
 
       - name: Push base
         run: docker push git.sylvainleclercq.com/depassage/coder-base:${IMAGE_TAG}

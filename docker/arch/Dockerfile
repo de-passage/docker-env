@@ -1,8 +1,8 @@
 FROM archlinux/archlinux
 
-RUN pacman -Syu --needed --noconfirm base-devel bash git neovim vim tmux fzf zsh git-delta jq starship curl ripgrep fd bat
+RUN pacman -Syu --needed --noconfirm base-devel bash git neovim unzip tmux fzf zsh git-delta jq starship curl ripgrep fd bat
 
-ARG home_dir=/home/dev 
+ARG home_dir=/home/dev
 ARG workspace="${home_dir}/workspace"
 ARG dotfiles="${workspace}/dotfiles"
 ARG config="${home_dir}/.config"

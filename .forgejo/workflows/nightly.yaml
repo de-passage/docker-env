@@ -1,0 +1,20 @@
+name: nightly
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  base:
+    uses: ./.forgejo/workflows/build-base.yaml
+    with:
+      tag: nightly
+    secrets: inherit
+
+  cpp:
+    needs: base
+    uses: ./.forgejo/workflows/build-cpp.yaml
+    with:
+      tag: nightly
+    secrets: inherit

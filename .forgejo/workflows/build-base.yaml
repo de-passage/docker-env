@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: docker
     container:
-      image: docker:27-cli
+      image: git.sylvainleclercq.com/depassage/ci-node-docker:22-bookworm
 
     steps:
       - uses: actions/checkout@v4

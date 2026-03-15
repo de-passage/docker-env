@@ -1,0 +1,68 @@
+name: build-cpp
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'cpp/**'
+      - '.forgejo/workflows/build-cpp.yaml'
+  workflow_call:
+    inputs:
+      tag:
+        required: false
+        type: string
+        default: ""
+      base_tag:
+        required: false
+        type: string
+        default: "nightly"
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: false
+        type: string
+        default: ""
+      base_tag:
+        required: false
+        type: string
+        default: "nightly"
+
+jobs:
+  build:
+    runs-on: docker
+    container:
+      image: git.sylvainleclercq.com/depassage/ci-node-docker:22-bookworm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute tags
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            echo "IMAGE_TAG=${{ inputs.tag }}" >> "$FORGEJO_ENV"
+          else
+            echo "IMAGE_TAG=${{ github.sha }}" >> "$FORGEJO_ENV"
+          fi
+
+          if [ -n "${{ inputs.base_tag }}" ]; then
+            echo "BASE_TAG=${{ inputs.base_tag }}" >> "$FORGEJO_ENV"
+          else
+            echo "BASE_TAG=nightly" >> "$FORGEJO_ENV"
+          fi
+
+      - name: Login to registry
+        run: echo "${{ secrets.REGISTRY_TOKEN }}" | docker login git.sylvainleclercq.com -u depassage --password-stdin
+
+      - name: Build cpp
+        run: docker build --build-arg BASE_TAG=${BASE_TAG} -t git.sylvainleclercq.com/depassage/coder-cpp:${IMAGE_TAG} -f docker/cpp/Dockerfile docker/cpp
+
+      - name: Push cpp
+        run: docker push git.sylvainleclercq.com/depassage/coder-cpp:${IMAGE_TAG}
+
+      - name: Also push nightly on direct push/manual
+        if: ${{ inputs.tag == '' }}
+        run: |
+          docker tag git.sylvainleclercq.com/depassage/coder-cpp:${IMAGE_TAG} git.sylvainleclercq.com/depassage/coder-cpp:nightly
+          docker push git.sylvainleclercq.com/depassage/coder-cpp:nightly
+

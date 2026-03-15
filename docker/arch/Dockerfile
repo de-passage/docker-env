@@ -38,3 +38,7 @@ RUN sh -c "$(curl https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools
 ARG NEOVIM_CONFIG_BRANCH=master
 RUN git clone --branch ${NEOVIM_CONFIG_BRANCH} https://github.com/de-passage/neovim-config.git "${home_dir}/.config/nvim"  && \
     nvim --headless -c 'MasonInstall lua-language-server' -c 'q'
+RUN nvim --headless +"Lazy! update" +qa
+
+RUN sed 's!\(checker\s*=\s*{\s*enabled\s*=\s*\)true!\1false!' "${config_dir}/nvim/lua/config/lazy.lua"
+

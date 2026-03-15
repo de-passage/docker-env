@@ -4,8 +4,8 @@ RUN pacman -Syu --needed --noconfirm base-devel bash git neovim unzip tmux fzf z
 
 ARG home_dir=/home/dev
 ARG workspace="${home_dir}/workspace"
-ARG dotfiles="${workspace}/dotfiles"
 ARG config="${home_dir}/.config"
+ARG dotfiles="${config}/dotfiles"
 
 RUN useradd -d "${home_dir}" -m dev -s /usr/sbin/zsh && echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
@@ -40,5 +40,6 @@ RUN git clone --branch ${NEOVIM_CONFIG_BRANCH} https://github.com/de-passage/neo
     nvim --headless -c 'MasonInstall lua-language-server' -c 'q'
 RUN nvim --headless +"Lazy! update" +qa
 
-RUN sed 's!\(checker\s*=\s*{\s*enabled\s*=\s*\)true!\1false!' "${config_dir}/nvim/lua/config/lazy.lua"
+RUN sed 's!\(checker\s*=\s*{\s*enabled\s*=\s*\)true!\1false!' "${config}/nvim/lua/config/lazy.lua" -i
 
+WORKDIR "${home_dir}/workspace"

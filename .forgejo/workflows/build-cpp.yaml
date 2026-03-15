@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'cpp/**'
+      - 'docker/cpp/**'
       - '.forgejo/workflows/build-cpp.yaml'
   workflow_call:
     inputs:

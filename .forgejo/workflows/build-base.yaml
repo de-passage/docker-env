@@ -25,7 +25,7 @@ jobs:
         run: echo "${{ secrets.REGISTRY_TOKEN }}" | docker login git.sylvainleclercq.com -u depassage --password-stdin
 
       - name: Build image
-        run: docker build -t git.sylvainleclercq.com/depassage/coder-base:${{ github.sha }} .
+        run: docker build -t git.sylvainleclercq.com/depassage/coder-base:${{ github.sha }} -f docker/arch/Dockerfile docker/arch
 
       - name: Push sha tag
         run: docker push git.sylvainleclercq.com/depassage/coder-base:${{ github.sha }}

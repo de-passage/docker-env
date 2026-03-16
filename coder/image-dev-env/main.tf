@@ -173,6 +173,7 @@ locals {
 resource "coder_agent" "main" {
   os   = "linux"
   arch = "amd64"
+  dir  = local.workspace_folder
 
   startup_script = <<-EOT
     set -e
@@ -380,6 +381,8 @@ resource "kubernetes_deployment_v1" "main" {
           workload = "workspaces"
         }
 
+        hostname = lower(replace(data.coder_workspace.me.name, "_", "-"))
+
         toleration {
           key      = "workload"
           operator = "Equal"
@@ -391,7 +394,7 @@ resource "kubernetes_deployment_v1" "main" {
           run_as_user     = 1000
           fs_group        = 1000
           run_as_non_root = true
-          supplemental_groups = 994
+          supplemental_groups = [ 994 ]
         }
 
         image_pull_secrets {
@@ -450,7 +453,7 @@ resource "kubernetes_deployment_v1" "main" {
           }
 
           volume_mount {
-            mount_path = "/home/dev"
+            mount_path = "/home/dev/workspace"
             name       = "home"
             read_only  = false
           }

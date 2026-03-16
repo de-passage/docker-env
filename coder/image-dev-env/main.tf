@@ -391,6 +391,7 @@ resource "kubernetes_deployment_v1" "main" {
           run_as_user     = 1000
           fs_group        = 1000
           run_as_non_root = true
+          supplemental_groups = 994
         }
 
         image_pull_secrets {
@@ -449,7 +450,7 @@ resource "kubernetes_deployment_v1" "main" {
           }
 
           volume_mount {
-            mount_path = "/home/dev/workspace"
+            mount_path = "/home/dev"
             name       = "home"
             read_only  = false
           }
